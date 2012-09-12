@@ -1,0 +1,15 @@
+# IOPS TEST for fio
+[global]
+description=IOPS TEST
+
+[iops_test]
+bssplit=4k/60:8k/10:16k/10:32k/10:64k/10
+group_reporting
+rw=randread
+direct=1
+#numjobs=32
+iodepth=32
+size=1G
+filename=/dev/sdb
+ioengine=sync
+runtime=60
