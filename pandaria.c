@@ -94,6 +94,10 @@ int main(int argc, const char *argv[])
 	 * fraction calucate the fraction of response time appear in <5ms, 10ms, 15ms, 20ms, 25ms, 30ms, >30ms
 	 */
 	long int fraction[7];
+	FILE *p;
+	char command[256];
+	char po[20];
+	int end = 1;
 	
 	total_time.tv_sec = total_time.tv_usec = 0;
 
@@ -154,9 +158,19 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	printf("Init over... Start trace play. Begin time is Beijing time:\n");
+	printf("Init over... Start trace play. Begin time is Beijing time:");
 	time_t p_time = time(NULL);
-	printf("%s\n", ctime(&p_time));
+	printf("%s", ctime(&p_time));
+
+	snprintf(command, sizeof(command), "sed -n '%ld{p;q}' %s| awk 'BEGIN{FS=\",\"};{print $5}'", setting.records_num, setting.spc_loc);
+	p = popen(command, "r");
+	fscanf(p, "%s", po);
+	sscanf(po, "%d.%ld", &end, &i);
+	if (end == 0) {
+		end = 1;
+	}
+	printf("Program expect end in %ds\n", end);
+	fclose(p);
 
 	gettimeofday(&begin_time, NULL);
 
@@ -177,7 +191,7 @@ int main(int argc, const char *argv[])
 	threadpool_destroy(pool, 0);
 	close(fd);
 
-	printf("Trace play over, %ld traces are late. now calculate total response time.\n", late);
+	printf("Trace play over, %ld traces are late.The IOPS is %d.Now calculate total response time.\n", late, thread/end);
 	for (i = 0; i < setting.records_num; i++) {
 		timeradd(&total_time, &records[i].res_time, &total_time);
 		usec = records[i].res_time.tv_usec;
@@ -187,7 +201,7 @@ int main(int argc, const char *argv[])
 			fraction[usec / 5000]++;
 		}
 	}
-	printf("Play %d traces in %ld.%06lds\n", setting.records_num, total_time.tv_sec, total_time.tv_usec);
+	printf("Play %ld traces in %ld.%06lds\n", setting.records_num, total_time.tv_sec, total_time.tv_usec);
 	printf("<5ms:%ld\t10ms:%ld\t15ms:%ld\t20ms:%ld\t25ms:%ld\t30ms:%ld\t>30ms:%ld\n", \
 			fraction[0], fraction[1], fraction[2], fraction[3], fraction[4], \
 			fraction[5], fraction[6]);

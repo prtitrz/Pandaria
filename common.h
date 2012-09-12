@@ -2,7 +2,7 @@
  * not use coding, decomposition and recombine now.
  */
 struct setting {
-	int records_num;
+	long int records_num;
 	int threads_num;
 	int pool_size; 
 	char coding[10];

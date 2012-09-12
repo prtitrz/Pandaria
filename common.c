@@ -23,7 +23,7 @@ int init_conf(struct setting *setting)
 		if (sscanf(buf, "loc=%s", setting->location) == 1) {
 			continue;
 		}
-		if (sscanf(buf, "records_num=%d", &setting->records_num) == 1) {
+		if (sscanf(buf, "records_num=%ld", &setting->records_num) == 1) {
 			continue;
 		}
 		if (sscanf(buf, "threads_num=%d", &setting->threads_num) == 1) {
